@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
-namespace CRUD.Dtos
+﻿namespace CRUD.Dtos
 {
     public class AuthorDto
     {  
