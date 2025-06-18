@@ -144,7 +144,7 @@ namespace CRUD.Controllers
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBook(int id, [FromBody] BookDto dto)
+        public async Task<IActionResult> UpdateBook(int id, [FromForm] BookDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

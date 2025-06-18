@@ -30,7 +30,7 @@ namespace CRUD.Controllers
             return Ok(category);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateCategory([FromBody] CategoryDto dto)
+        public async Task<IActionResult> CreateCategory([FromForm]CategoryDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -53,7 +53,7 @@ namespace CRUD.Controllers
             return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCategory(int id, CategoryDto dto)
+        public async Task<IActionResult> UpdateCategory(int id,[FromForm] CategoryDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
