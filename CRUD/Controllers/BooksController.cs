@@ -10,7 +10,7 @@ namespace CRUD.Controllers
     public class BooksController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private new List<string> _allowedExtenstions = new List<string> { ".jpg", ".png" };
+        private readonly List<string> _allowedExtensions = new List<string> { ".jpg", ".png" };
         public BooksController(ApplicationDbContext context)
         {
             _context = context;
@@ -44,10 +44,10 @@ namespace CRUD.Controllers
                 .Include(b => b.Author)
                 .Include(b => b.Category)
                 .SingleOrDefaultAsync(b => b.Id == id);
+            
             if (book == null)
-            {
                 return NotFound();
-            }
+            
             var dto = new BookDetailsDto
             {
                 Id = book.Id,
@@ -66,34 +66,69 @@ namespace CRUD.Controllers
         public async Task<IActionResult> GetBooksByCategory(int categoryId)
         {
             var books = await _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Category)
                 .Where(b => b.CategoryId == categoryId)
+                .Select(b => new BookDetailsDto
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Year = b.Year,
+                    Price = b.Price,
+                    AuthorId = b.AuthorId,
+                    CategoryId = b.CategoryId,
+                    Cover = b.Cover,
+                    AuthorFullName = b.Author.FullName,
+                    CategoryName = b.Category.Name
+                })
                 .ToListAsync();
+            
             if (books == null || !books.Any())
-            {
                 return NotFound($"No books found for category ID: {categoryId}");
-            }
+            
             return Ok(books);
         }
         [HttpGet("author/{authorId}")]
         public async Task<IActionResult> GetBooksByAuthor(int authorId)
         {
             var books = await _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Category)
                 .Where(b => b.AuthorId == authorId)
+                .Select(Author => new BookDetailsDto
+                {
+                    Id = Author.Id,
+                    Title = Author.Title,
+                    Year = Author.Year,
+                    Price = Author.Price,
+                    AuthorId = Author.AuthorId,
+                    CategoryId = Author.CategoryId,
+                    Cover = Author.Cover,
+                    AuthorFullName = Author.Author.FullName,
+                    CategoryName = Author.Category.Name
+                })
                 .ToListAsync();
+            
             if (books == null || !books.Any())
-            {
                 return NotFound($"No books found for author ID: {authorId}");
-            }
+            
             return Ok(books);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateBook([FromBody] BookDto dto)
+        public async Task<IActionResult> CreateBook([FromForm] BookDto dto)
         {
-            if (!_allowedExtenstions.Contains(Path.GetExtension(dto.Cover.FileName).ToLower()))
-                return BadRequest("Only .png and .jpg images are allowed!");
-            using var dataStream = new MemoryStream();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            if (dto.Cover == null)
+                return BadRequest("Cover image is required!");
+
+            if (!_allowedExtensions.Contains(Path.GetExtension(dto.Cover.FileName).ToLower()))
+                return BadRequest("Only .png and .jpg images are allowed!");
+            
+            using var dataStream = new MemoryStream();
             await dto.Cover.CopyToAsync(dataStream);
+
             var book = new Book
             {
                 Title = dto.Title,
@@ -103,10 +138,7 @@ namespace CRUD.Controllers
                 CategoryId = dto.CategoryId,
                 Cover = dataStream.ToArray()
             };
-            if (book == null || !ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+           
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
@@ -114,13 +146,23 @@ namespace CRUD.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBook(int id, [FromBody] BookDto dto)
         {
-            if (!_allowedExtenstions.Contains(Path.GetExtension(dto.Cover.FileName).ToLower()))
-                return BadRequest("Only .png and .jpg images are allowed!");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var book = await _context.Books.FindAsync(id);
             if (book == null)
                 return NotFound($"No Book Was Found With ID: {id}");
+
+            if (dto.Cover == null)
+                return BadRequest("Cover image is required!");
+
+            if (!_allowedExtensions.Contains(Path.GetExtension(dto.Cover.FileName).ToLower()))
+                return BadRequest("Only .png and .jpg images are allowed!");
+           
             using var dataStream = new MemoryStream();
             await dto.Cover.CopyToAsync(dataStream);
+
+
             book.Title = dto.Title;
             book.Year = dto.Year;
             book.Price = dto.Price;
@@ -128,12 +170,8 @@ namespace CRUD.Controllers
             book.CategoryId = dto.CategoryId;
             book.Cover = dataStream.ToArray();
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            
             _context.Entry(book).State = EntityState.Modified;
-            _context.Books.Update(book);
             await _context.SaveChangesAsync();
 
             return Ok(book);
