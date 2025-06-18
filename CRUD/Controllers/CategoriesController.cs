@@ -17,13 +17,17 @@ namespace CRUD.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCategories()
         {
-            var categories = await _context.Categories.ToListAsync();
+            var categories = await _context.Categories
+                .Include(c => c.Books)
+                .ToListAsync();
             return Ok(categories);
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCategory(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _context.Categories
+                .Include(c => c.Books)  
+                .SingleOrDefaultAsync(c => c.Id == id);
             if (category == null)
                 return NotFound($"No Category Was Found With ID: {id}");
             

@@ -17,13 +17,17 @@ namespace CRUD.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAuthors()
         {
-            var authors = await _context.Authors.ToListAsync();
+            var authors = await _context.Authors
+                .Include(a => a.Books)
+                .ToListAsync();
             return Ok(authors);
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAuthor(int id)
         {
-            var author = await _context.Authors.FindAsync(id);
+            var author = await _context.Authors
+                .Include(a => a.Books)
+                .SingleOrDefaultAsync(a => a.Id == id);
             if (author == null)
             {
                 return NotFound($"No Author Was Found With ID: {id}");
@@ -31,7 +35,7 @@ namespace CRUD.Controllers
             return Ok(author);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateAuthor([FromBody] AuthorDto dto)
+        public async Task<IActionResult> CreateAuthor([FromForm] AuthorDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -55,7 +59,7 @@ namespace CRUD.Controllers
             return CreatedAtAction(nameof(GetAuthor), new { id = author.Id }, author);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAuthor(int id, AuthorDto dto)
+        public async Task<IActionResult> UpdateAuthor(int id, [FromForm]AuthorDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
