@@ -1,8 +1,4 @@
-﻿using AutoMapper;
-using CRUD.Data;
-using CRUD.Dtos;
-
-namespace CRUD.Helpers
+﻿namespace CRUD.Helpers
 {
     public class MappingProfile : Profile
     {

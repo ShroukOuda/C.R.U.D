@@ -1,0 +1,9 @@
+﻿global using AutoMapper;
+global using CRUD.Data; 
+global using CRUD.Data.Models;
+global using CRUD.Dtos;
+global using CRUD.Services;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.EntityFrameworkCore;
+global using System.ComponentModel.DataAnnotations;
+global using System.ComponentModel.DataAnnotations.Schema;

@@ -1,8 +1,4 @@
-﻿using CRUD.Data;
-using CRUD.Dtos;
-using Microsoft.EntityFrameworkCore;
-
-namespace CRUD.Services
+﻿namespace CRUD.Services
 {
     public class BooksService : IBooksService
     {

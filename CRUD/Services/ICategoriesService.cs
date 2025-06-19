@@ -1,6 +1,4 @@
-﻿using CRUD.Data;
-
-namespace CRUD.Services
+﻿namespace CRUD.Services
 {
     public interface ICategoriesService
     {

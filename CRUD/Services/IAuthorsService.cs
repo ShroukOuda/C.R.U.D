@@ -1,7 +1,4 @@
-﻿using CRUD.Data;
-using CRUD.Dtos;
-
-namespace CRUD.Services
+﻿namespace CRUD.Services
 {
     public interface IAuthorsService
     {

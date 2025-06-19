@@ -1,6 +1,4 @@
-﻿using CRUD.Data;
-
-namespace CRUD.Dtos
+﻿namespace CRUD.Dtos
 {
     public class CategoryDto
     {

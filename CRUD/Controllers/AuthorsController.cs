@@ -1,11 +1,4 @@
-﻿using AutoMapper;
-using CRUD.Data;
-using CRUD.Dtos;
-using CRUD.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
-namespace CRUD.Controllers
+﻿namespace CRUD.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -25,6 +18,8 @@ namespace CRUD.Controllers
 
             return Ok(authors);
         }
+
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAuthor(int id)
         {
@@ -36,6 +31,9 @@ namespace CRUD.Controllers
             }
             return Ok(author);
         }
+
+
+
         [HttpPost]
         public async Task<IActionResult> CreateAuthor([FromForm] AuthorDto dto)
         {
@@ -54,6 +52,8 @@ namespace CRUD.Controllers
 
             return CreatedAtAction(nameof(GetAuthor), new { id = author.Id }, author);
         }
+
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAuthor(int id, [FromForm]AuthorDto dto)
         {
@@ -74,6 +74,8 @@ namespace CRUD.Controllers
             _authorsService.UpdateAuthorAsync(author);
             return Ok(author);
         }
+
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAuthor(int id)
         {

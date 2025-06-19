@@ -1,8 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace CRUD.Data
+﻿namespace CRUD.Data.Models
 {
     [Index(nameof(Name), IsUnique = true)]
     public class Category

@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace CRUD.Data
+﻿namespace CRUD.Data
 {
     public class ApplicationDbContext : DbContext
     {

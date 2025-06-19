@@ -1,7 +1,4 @@
-﻿using CRUD.Data;
-using Microsoft.EntityFrameworkCore;
-
-namespace CRUD.Services
+﻿namespace CRUD.Services
 {
     public class AuthorsService : IAuthorsService
     {

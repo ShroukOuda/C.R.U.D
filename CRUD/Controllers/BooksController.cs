@@ -1,11 +1,4 @@
-﻿using AutoMapper;
-using CRUD.Data;
-using CRUD.Dtos;
-using CRUD.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
-namespace CRUD.Controllers
+﻿namespace CRUD.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -35,6 +28,8 @@ namespace CRUD.Controllers
             
             return Ok(data);
         }
+
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBook(int id)
         {
@@ -46,6 +41,8 @@ namespace CRUD.Controllers
             var dto = _mapper.Map<BookDetailsDto>(book);
             return Ok(dto);
         }
+
+
         [HttpGet("category/{categoryId}")]
         public async Task<IActionResult> GetBooksByCategory(int categoryId)
         {
@@ -57,6 +54,8 @@ namespace CRUD.Controllers
             var data = _mapper.Map<List<BookDetailsDto>>(books);
             return Ok(data);
         }
+
+
         [HttpGet("author/{authorId}")]
         public async Task<IActionResult> GetBooksByAuthor(int authorId)
         {
@@ -68,6 +67,8 @@ namespace CRUD.Controllers
             var data = _mapper.Map<List<BookDetailsDto>>(books);
             return Ok(data);
         }
+
+
         [HttpPost]
         public async Task<IActionResult> CreateBook([FromForm] BookDto dto)
         {
@@ -98,6 +99,8 @@ namespace CRUD.Controllers
 
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
         }
+
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBook(int id, [FromForm] BookDto dto)
         {
@@ -130,6 +133,8 @@ namespace CRUD.Controllers
             _booksService.UpdateBookAsync(book);
             return Ok(book);
         }
+
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {

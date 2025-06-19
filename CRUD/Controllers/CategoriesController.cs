@@ -1,11 +1,4 @@
-﻿using AutoMapper;
-using CRUD.Data;
-using CRUD.Dtos;
-using CRUD.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
-namespace CRUD.Controllers
+﻿namespace CRUD.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
