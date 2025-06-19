@@ -17,6 +17,13 @@ namespace CRUD
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
+
+            builder.Services.AddScoped<Services.IBooksService, Services.BooksService>();
+            builder.Services.AddScoped<Services.IAuthorsService, Services.AuthorsService>();
+            builder.Services.AddScoped<Services.ICategoriesService, Services.CategoriesService>();
+
+            builder.Services.AddAutoMapper(typeof(Program));
+
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();

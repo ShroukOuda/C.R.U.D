@@ -1,5 +1,7 @@
-﻿using CRUD.Data;
+﻿using AutoMapper;
+using CRUD.Data;
 using CRUD.Dtos;
+using CRUD.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,110 +11,62 @@ namespace CRUD.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
+        private readonly IBooksService _booksService;
+        private readonly ICategoriesService _categoriesService;
+        private readonly IAuthorsService _authorsService;
+
         private readonly List<string> _allowedExtensions = new List<string> { ".jpg", ".png" };
-        public BooksController(ApplicationDbContext context)
+
+        public BooksController(IBooksService booksService, IMapper mapper, ICategoriesService categoriesService, IAuthorsService authorsService)
         {
-            _context = context;
+            _booksService = booksService;
+            _mapper = mapper;
+            _categoriesService = categoriesService;
+            _authorsService = authorsService;
         }
+
         [HttpGet]
         public async Task<IActionResult> GetBooks()
         {
-            var books = await _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Category)
-                .Select(b => new BookDetailsDto
-                {
-                    Id = b.Id,
-                    Title = b.Title,
-                    Year = b.Year,
-                    Price = b.Price,
-                    AuthorId = b.AuthorId,
-                    CategoryId = b.CategoryId,
-                    Cover = b.Cover,
-                    AuthorFullName = b.Author.FullName,
-                    CategoryName = b.Category.Name
-                })
-                .ToListAsync();
-
-            return Ok(books);
+            var books = await _booksService.GetBooksAsync();
+            
+            var data = _mapper.Map<IEnumerable<BookDetailsDto>>(books);
+            
+            return Ok(data);
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBook(int id)
         {
-            var book = await _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Category)
-                .SingleOrDefaultAsync(b => b.Id == id);
-            
+            var book = await _booksService.GetBookAsync(id);
+
             if (book == null)
                 return NotFound();
-            
-            var dto = new BookDetailsDto
-            {
-                Id = book.Id,
-                Title = book.Title,
-                Year = book.Year,
-                Price = book.Price,
-                AuthorId = book.AuthorId,
-                CategoryId = book.CategoryId,
-                Cover = book.Cover,
-                AuthorFullName = book.Author.FullName,
-                CategoryName = book.Category.Name
-            };
+
+            var dto = _mapper.Map<BookDetailsDto>(book);
             return Ok(dto);
         }
         [HttpGet("category/{categoryId}")]
         public async Task<IActionResult> GetBooksByCategory(int categoryId)
         {
-            var books = await _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Category)
-                .Where(b => b.CategoryId == categoryId)
-                .Select(b => new BookDetailsDto
-                {
-                    Id = b.Id,
-                    Title = b.Title,
-                    Year = b.Year,
-                    Price = b.Price,
-                    AuthorId = b.AuthorId,
-                    CategoryId = b.CategoryId,
-                    Cover = b.Cover,
-                    AuthorFullName = b.Author.FullName,
-                    CategoryName = b.Category.Name
-                })
-                .ToListAsync();
+            var books = await _booksService.GetBookAsync(categoryId);
             
-            if (books == null || !books.Any())
+            if (books == null)
                 return NotFound($"No books found for category ID: {categoryId}");
             
-            return Ok(books);
+            var data = _mapper.Map<List<BookDetailsDto>>(books);
+            return Ok(data);
         }
         [HttpGet("author/{authorId}")]
         public async Task<IActionResult> GetBooksByAuthor(int authorId)
         {
-            var books = await _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Category)
-                .Where(b => b.AuthorId == authorId)
-                .Select(Author => new BookDetailsDto
-                {
-                    Id = Author.Id,
-                    Title = Author.Title,
-                    Year = Author.Year,
-                    Price = Author.Price,
-                    AuthorId = Author.AuthorId,
-                    CategoryId = Author.CategoryId,
-                    Cover = Author.Cover,
-                    AuthorFullName = Author.Author.FullName,
-                    CategoryName = Author.Category.Name
-                })
-                .ToListAsync();
-            
-            if (books == null || !books.Any())
+            var books = await _booksService.GetBookAsync(authorId);
+          
+            if (books == null)
                 return NotFound($"No books found for author ID: {authorId}");
             
-            return Ok(books);
+            var data = _mapper.Map<List<BookDetailsDto>>(books);
+            return Ok(data);
         }
         [HttpPost]
         public async Task<IActionResult> CreateBook([FromForm] BookDto dto)
@@ -126,21 +80,22 @@ namespace CRUD.Controllers
             if (!_allowedExtensions.Contains(Path.GetExtension(dto.Cover.FileName).ToLower()))
                 return BadRequest("Only .png and .jpg images are allowed!");
             
+            var IsValidCategory = await _categoriesService.IsValidCategory(dto.CategoryId);
+            if (!IsValidCategory)
+                return BadRequest($"No Category Was Found With ID: {dto.CategoryId}");
+            
+            var IsValidAuthor = await _authorsService.IsValidAuthor(dto.AuthorId);
+            if (!IsValidAuthor)
+                return BadRequest($"No Author Was Found With ID: {dto.AuthorId}");
+            
             using var dataStream = new MemoryStream();
             await dto.Cover.CopyToAsync(dataStream);
 
-            var book = new Book
-            {
-                Title = dto.Title,
-                Year = dto.Year,
-                Price = dto.Price,
-                AuthorId = dto.AuthorId,
-                CategoryId = dto.CategoryId,
-                Cover = dataStream.ToArray()
-            };
-           
-            _context.Books.Add(book);
-            await _context.SaveChangesAsync();
+            var book = _mapper.Map<Book>(dto);
+            book.Cover = dataStream.ToArray();
+
+            await _booksService.CreateBookAsync(book);
+
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
         }
         [HttpPut("{id}")]
@@ -149,7 +104,7 @@ namespace CRUD.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var book = await _context.Books.FindAsync(id);
+            var book = await _booksService.GetBookAsync(id);
             if (book == null)
                 return NotFound($"No Book Was Found With ID: {id}");
 
@@ -158,34 +113,33 @@ namespace CRUD.Controllers
 
             if (!_allowedExtensions.Contains(Path.GetExtension(dto.Cover.FileName).ToLower()))
                 return BadRequest("Only .png and .jpg images are allowed!");
-           
+
+            var IsValidCategory = await _categoriesService.IsValidCategory(dto.CategoryId);
+            if (!IsValidCategory)
+                return BadRequest($"No Category Was Found With ID: {dto.CategoryId}");
+
+            var IsValidAuthor = await _authorsService.IsValidAuthor(dto.AuthorId);
+            if (!IsValidAuthor)
+                return BadRequest($"No Author Was Found With ID: {dto.AuthorId}");
+
             using var dataStream = new MemoryStream();
             await dto.Cover.CopyToAsync(dataStream);
-
-
-            book.Title = dto.Title;
-            book.Year = dto.Year;
-            book.Price = dto.Price;
-            book.AuthorId = dto.AuthorId;
-            book.CategoryId = dto.CategoryId;
-            book.Cover = dataStream.ToArray();
-
             
-            _context.Entry(book).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _mapper.Map(dto, book);
 
+            _booksService.UpdateBookAsync(book);
             return Ok(book);
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
-            var book = await _context.Books.FindAsync(id);
+            var book = await _booksService.GetBookAsync(id);
             if (book == null)
             {
                 return NotFound($"No Book Was Found With ID: {id}");
             }
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
+            
+            _booksService.DeleteBookAsync(book);
             return Ok($"Book with ID: {id} was deleted successfully.");
         }
     }
