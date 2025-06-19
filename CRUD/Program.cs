@@ -1,7 +1,3 @@
-
-using CRUD.Data;
-using Microsoft.EntityFrameworkCore;
-
 namespace CRUD
 {
     public class Program
@@ -18,9 +14,11 @@ namespace CRUD
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
 
-            builder.Services.AddScoped<Services.IBooksService, Services.BooksService>();
-            builder.Services.AddScoped<Services.IAuthorsService, Services.AuthorsService>();
-            builder.Services.AddScoped<Services.ICategoriesService, Services.CategoriesService>();
+            builder.Services.AddScoped<IBooksService, BooksService>();
+            builder.Services.AddScoped<IAuthorsService, AuthorsService>();
+            builder.Services.AddScoped<ICategoriesService, CategoriesService>();
+
+            builder.Services.AddCors();
 
             builder.Services.AddAutoMapper(typeof(Program));
 
