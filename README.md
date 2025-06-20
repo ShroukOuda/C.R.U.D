@@ -35,7 +35,7 @@ The project follows a clean architecture pattern with the following layers:
 
 ## 🛠️ Technologies Used
 
-- **Framework**: ASP.NET Core 6.0+
+- **Framework**: ASP.NET Core 8.0+
 - **ORM**: Entity Framework Core
 - **Mapping**: AutoMapper
 - **Database**: SQL Server (configurable via `appsettings.json`)
@@ -93,7 +93,7 @@ CRUD/
 
 ### Prerequisites
 
-- .NET 6.0 SDK or later
+- .NET 8.0 SDK or later
 - SQL Server (LocalDB, Express, or Full)
 - Visual Studio 2022 or VS Code
 
