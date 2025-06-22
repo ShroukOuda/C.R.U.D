@@ -101,8 +101,8 @@ CRUD/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/ShroukOuda/CRUD.git
-   cd CRUD
+   git clone https://github.com/ShroukOuda/C.R.U.D.git
+   cd C.R.U.D
    ```
 
 2. **Restore NuGet packages**
