@@ -205,10 +205,6 @@ Key configuration options in `appsettings.json`:
 
 ## 🧪 Testing
 
-Run the test suite:
-```bash
-dotnet test
-```
 
 For manual testing, use the integrated Swagger UI at `/swagger` endpoint.
 
